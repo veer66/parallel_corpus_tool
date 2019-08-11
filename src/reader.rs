@@ -24,6 +24,8 @@ quick_error! {
     }
 }
 
+
+#[allow(dead_code)]
 impl Reader {
     pub fn parse_link(txt: &str) -> Result<Link, ParsingError> {
         let caps = LINK_RE.captures(txt).ok_or(ParsingError::ParseLink)?;
