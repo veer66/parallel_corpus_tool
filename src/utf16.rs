@@ -5,6 +5,7 @@ quick_error! {
     }
 }
 
+#[allow(dead_code)]
 pub fn substring(txt: &str, s: usize, e: usize) -> Result<String, SubstringError> {
     let a: Vec<_> = txt.encode_utf16().collect();
     let mut sub_a = vec![];
@@ -14,6 +15,7 @@ pub fn substring(txt: &str, s: usize, e: usize) -> Result<String, SubstringError
     String::from_utf16(&sub_a[..]).map_err(|_| SubstringError::EncodeUtf16)
 }
 
+#[allow(dead_code)]
 pub fn utf16_len(txt: &str) -> usize {
     txt.encode_utf16().count()
 }

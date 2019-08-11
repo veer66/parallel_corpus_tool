@@ -24,7 +24,6 @@ quick_error! {
     }
 }
 
-
 #[allow(dead_code)]
 impl Reader {
     pub fn parse_link(txt: &str) -> Result<Link, ParsingError> {
@@ -123,10 +122,10 @@ impl Reader {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::link::Link;
     use crate::config::Langs;
     use crate::lang::LangKey;
-    
+    use crate::link::Link;
+
     #[test]
     fn parse_simple_links() {
         assert_eq!(
@@ -158,8 +157,10 @@ mod tests {
     #[test]
     fn read_simple_lines() {
         let root = env!("CARGO_MANIFEST_DIR");
-        let langs = Langs {source: String::from("en"),
-                           target: String::from("th")};        
+        let langs = Langs {
+            source: String::from("en"),
+            target: String::from("th"),
+        };
         let conf = Config {
             corpus_dir: format!("{}/data", root),
             tok_prefix: String::from(""),
@@ -168,19 +169,21 @@ mod tests {
             orig_prefix: String::from("simple_lines"),
             output_amphigram_path: String::from(""),
             textunit_limit: 100,
-            textunit_offset: 0
+            textunit_offset: 0,
         };
         let reader = Reader { config: conf };
         let lines = reader.read_lines(LangKey::SOURCE).unwrap();
-        let expected = vec![String::from("ABC"), String::from("EFG")];        
+        let expected = vec![String::from("ABC"), String::from("EFG")];
         assert_eq!(expected, lines);
     }
-    
+
     #[test]
     fn read_simple_toks() {
         let root = env!("CARGO_MANIFEST_DIR");
-        let langs = Langs {source: String::from("en"),
-                           target: String::from("th")};        
+        let langs = Langs {
+            source: String::from("en"),
+            target: String::from("th"),
+        };
         let conf = Config {
             corpus_dir: format!("{}/data", root),
             tok_prefix: String::from("simple_toks"),
@@ -189,32 +192,55 @@ mod tests {
             orig_prefix: String::from(""),
             output_amphigram_path: String::from(""),
             textunit_limit: 100,
-            textunit_offset: 0
+            textunit_offset: 0,
         };
         let reader = Reader { config: conf };
         let toks = reader.read_toks(LangKey::SOURCE).unwrap();
-        assert_eq!(vec![vec![String::from("AB"), String::from("CD"), String::from("EF")]], toks);
+        assert_eq!(
+            vec![vec![
+                String::from("AB"),
+                String::from("CD"),
+                String::from("EF")
+            ]],
+            toks
+        );
     }
 
     #[test]
     fn read_simple_links() {
         let root = env!("CARGO_MANIFEST_DIR");
-        let langs = Langs {source: String::from("en"),
-                           target: String::from("th")};        
+        let langs = Langs {
+            source: String::from("en"),
+            target: String::from("th"),
+        };
         let conf = Config {
-            corpus_dir: String::from(""), 
+            corpus_dir: String::from(""),
             tok_prefix: String::from(""),
             langs: langs,
             alignment_file_path: format!("{}/data/simple_align", root),
             orig_prefix: String::from(""),
             output_amphigram_path: String::from(""),
             textunit_limit: 100,
-            textunit_offset: 0
+            textunit_offset: 0,
         };
         let reader = Reader { config: conf };
         let links = reader.read_links().unwrap();
-        let expected = vec![vec![Link {source: 1, target: 2}, Link {source: 5, target: 10}],
-                            vec![Link {source: 70, target: 100}]];
+        let expected = vec![
+            vec![
+                Link {
+                    source: 1,
+                    target: 2,
+                },
+                Link {
+                    source: 5,
+                    target: 10,
+                },
+            ],
+            vec![Link {
+                source: 70,
+                target: 100,
+            }],
+        ];
         assert_eq!(links, expected);
     }
 }
