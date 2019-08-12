@@ -26,8 +26,8 @@ impl StrMod for IdentityStrMod {
 quick_error! {
     #[derive(Debug)]
     pub enum CharAlignError {
-        CannotMatchSomeToks(text: String, toks: Vec<String>, s: usize) {
-            display("Cannon match: text={} toks={:?} s={}", &text, &toks, s)
+        CannotMatchSomeToks(text: String, toks: Vec<String>, i: usize, s: usize) {
+            display("Cannon match: text={} toks={:?} i={} s={}", &text, &toks, i, s)
         }
     }
 }
@@ -86,6 +86,7 @@ impl RToksBuilder {
                 return Err(CharAlignError::CannotMatchSomeToks(
                     String::from(orig),
                     toks.to_vec(),
+                    i,
                     s,
                 ));
             }
