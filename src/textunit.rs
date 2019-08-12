@@ -57,7 +57,6 @@ mod tests {
     use super::*;
     use crate::config::Config;
     use crate::config::Langs;
-    use crate::lang::LangKey;
     use crate::rtok::RTok;
     use crate::rtoks_builder::RToksBuilder;
 

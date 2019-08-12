@@ -1,8 +1,6 @@
 use crate::lang::LangKey;
 use crate::rtok::RTok;
 
-const MAX_PHRASE_LEN: usize = 10;
-
 #[derive(Debug, Clone)]
 pub struct BiRToks {
     pub source: Vec<RTok>,
