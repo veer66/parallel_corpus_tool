@@ -31,8 +31,8 @@ impl Textunit {
             .zip(source_text_list.into_iter())
             .zip(target_text_list.into_iter())
         {
-            let source_rtoks = rtoks_builder.align_text_tok(&source_text, &source_toks)?;
-            let target_rtoks = rtoks_builder.align_text_tok(&target_text, &target_toks)?;
+            let source_rtoks = rtoks_builder.align_text_toks(&source_text, &source_toks)?;
+            let target_rtoks = rtoks_builder.align_text_toks(&target_text, &target_toks)?;
             let bi_text = BiText {
                 source: source_text,
                 target: target_text,

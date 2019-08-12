@@ -21,6 +21,10 @@ impl StrMod for IdentityStrMod {
             .replace("&#93;", "]")
             .to_string()
     }
+
+    fn mod_orig(&self, s: &str) -> String {
+        s.replace("\u{F112}", " ").to_string()
+    }
 }
 
 quick_error! {
@@ -73,7 +77,11 @@ impl RToksBuilder {
         None
     }
 
-    pub fn align_text_tok(&self, orig: &str, toks: &[String]) -> Result<Vec<RTok>, CharAlignError> {
+    pub fn align_text_toks(
+        &self,
+        orig: &str,
+        toks: &[String],
+    ) -> Result<Vec<RTok>, CharAlignError> {
         let mut s = 0;
         let mut i = 0;
         let mut aligned_toks = vec![];
@@ -105,5 +113,63 @@ impl RToksBuilder {
                 s += 1;
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::rtok::RTok;
+
+    #[test]
+    fn align_text_toks_simple() {
+        let builder = RToksBuilder::new();
+        let text = "AB C";
+        let toks = vec![String::from("AB"), String::from(" "), String::from("C")];
+        let rtoks = builder.align_text_toks(text, &toks).unwrap();
+        let expected = vec![
+            RTok {
+                text: String::from("AB"),
+                s: 0,
+                e: 2,
+            },
+            RTok {
+                text: String::from(" "),
+                s: 2,
+                e: 3,
+            },
+            RTok {
+                text: String::from("C"),
+                s: 3,
+                e: 4,
+            },
+        ];
+        assert_eq!(rtoks, expected);
+    }
+
+    #[test]
+    fn align_text_toks_f112() {
+        let builder = RToksBuilder::new();
+        let text = "AB\u{F112}C";
+        let toks = vec![String::from("AB"), String::from(" "), String::from("C")];
+        let rtoks = builder.align_text_toks(text, &toks).unwrap();
+        let expected = vec![
+            RTok {
+                text: String::from("AB"),
+                s: 0,
+                e: 2,
+            },
+            RTok {
+                text: String::from("\u{F112}"),
+                s: 2,
+                e: 3,
+            },
+            RTok {
+                text: String::from("C"),
+                s: 3,
+                e: 4,
+            },
+        ];
+        assert_eq!(rtoks, expected);
     }
 }
