@@ -15,15 +15,12 @@ struct IdentityStrMod;
 impl StrMod for IdentityStrMod {
     fn mod_tok(&self, s: &str) -> String {
         s.replace("&apos;", "'")
+            .replace("\u{F112}", " ")
             .replace("&quot;", "\"")
             .replace("&amp;", "&")
             .replace("&#91;", "[")
             .replace("&#93;", "]")
             .to_string()
-    }
-
-    fn mod_orig(&self, s: &str) -> String {
-        s.replace("\u{F112}", " ").to_string()
     }
 }
 
@@ -151,8 +148,12 @@ mod tests {
     #[test]
     fn align_text_toks_f112() {
         let builder = RToksBuilder::new();
-        let text = "AB\u{F112}C";
-        let toks = vec![String::from("AB"), String::from(" "), String::from("C")];
+        let text = "AB C";
+        let toks = vec![
+            String::from("AB"),
+            String::from("\u{F112}"),
+            String::from("C"),
+        ];
         let rtoks = builder.align_text_toks(text, &toks).unwrap();
         let expected = vec![
             RTok {
@@ -161,7 +162,7 @@ mod tests {
                 e: 2,
             },
             RTok {
-                text: String::from("\u{F112}"),
+                text: String::from(" "),
                 s: 2,
                 e: 3,
             },
@@ -173,4 +174,20 @@ mod tests {
         ];
         assert_eq!(rtoks, expected);
     }
+
+    #[test]
+    fn align_simple_read_text() {
+        let builder = RToksBuilder::new();
+        let toks: Vec<String> = "มาตรา  1  พระ ราช บัญญัติ นี้ เรียก ว่า “ พระ ราช บัญญัติ คุ้มครอง สิ่งบ่งชี้ ทาง ภูมิศาสตร์  พ. ศ.  2546 ”".split(" ").map(|tok| tok.to_string()).collect();
+        let text =
+            "มาตรา 1 พระราชบัญญัตินี้เรียกว่า “พระราชบัญญัติคุ้มครองสิ่งบ่งชี้ทางภูมิศาสตร์ พ.ศ. 2546”";
+        let rtoks = builder.align_text_toks(text, &toks).unwrap();
+        let rtok0 = RTok {
+            text: String::from("มาตรา"),
+            s: 0,
+            e: 5,
+        };
+        assert_eq!(rtoks[0], rtok0);
+    }
+
 }

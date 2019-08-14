@@ -6,6 +6,16 @@ use crate::reader::Reader;
 use crate::rtoks_builder::RToksBuilder;
 use std::error::Error;
 
+quick_error! {
+    #[derive(Debug)]
+    pub enum TextunitLoadingError {
+        CannotLoadToks(lang: LangKey, err: Box<Error>) { }
+        CannotLoadLines(lang: LangKey, err: Box<Error>) { }
+        CannotLoadLinks(err: Box<Error>) { }
+        CannotAlignToks(lang: LangKey, line_no: usize, err: Box<Error>) { }
+    }
+}
+
 #[derive(Debug)]
 pub struct Textunit {
     pub bi_text: BiText,
@@ -18,12 +28,23 @@ impl Textunit {
         reader: &Reader,
         rtoks_builder: &RToksBuilder,
     ) -> Result<Vec<Textunit>, Box<Error>> {
-        let links_list = reader.read_links()?;
-        let source_toks_list = reader.read_toks(LangKey::SOURCE)?;
-        let target_toks_list = reader.read_toks(LangKey::TARGET)?;
-        let source_text_list = reader.read_lines(LangKey::SOURCE)?;
-        let target_text_list = reader.read_lines(LangKey::TARGET)?;
+        let links_list = reader
+            .read_links()
+            .map_err(|err| TextunitLoadingError::CannotLoadLinks(err))?;
+        let source_toks_list = reader
+            .read_toks(LangKey::SOURCE)
+            .map_err(|err| TextunitLoadingError::CannotLoadToks(LangKey::SOURCE, err))?;
+        let target_toks_list = reader
+            .read_toks(LangKey::TARGET)
+            .map_err(|err| TextunitLoadingError::CannotLoadToks(LangKey::TARGET, err))?;
+        let source_text_list = reader
+            .read_lines(LangKey::SOURCE)
+            .map_err(|err| TextunitLoadingError::CannotLoadLines(LangKey::SOURCE, err))?;
+        let target_text_list = reader
+            .read_lines(LangKey::TARGET)
+            .map_err(|err| TextunitLoadingError::CannotLoadLines(LangKey::TARGET, err))?;
         let mut textunits = vec![];
+        let mut line_no = 0;
         for ((((links, source_toks), target_toks), source_text), target_text) in links_list
             .into_iter()
             .zip(source_toks_list.into_iter())
@@ -31,8 +52,17 @@ impl Textunit {
             .zip(source_text_list.into_iter())
             .zip(target_text_list.into_iter())
         {
-            let source_rtoks = rtoks_builder.align_text_toks(&source_text, &source_toks)?;
-            let target_rtoks = rtoks_builder.align_text_toks(&target_text, &target_toks)?;
+            line_no += 1;
+            let source_rtoks = rtoks_builder
+                .align_text_toks(&source_text, &source_toks)
+                .map_err(|err| {
+                    TextunitLoadingError::CannotAlignToks(LangKey::SOURCE, line_no, Box::new(err))
+                })?;
+            let target_rtoks = rtoks_builder
+                .align_text_toks(&target_text, &target_toks)
+                .map_err(|err| {
+                    TextunitLoadingError::CannotAlignToks(LangKey::TARGET, line_no, Box::new(err))
+                })?;
             let bi_text = BiText {
                 source: source_text,
                 target: target_text,
@@ -87,5 +117,4 @@ mod tests {
         };
         assert_eq!(textunits[0].bi_rtoks.target[1], rtok);
     }
-
 }
